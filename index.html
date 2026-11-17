@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Campus Vote — Student Election</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #172033;
+      --muted: #68738a;
+      --primary: #635bff;
+      --primary-dark: #4b43df;
+      --surface: #ffffff;
+      --background: #f5f6fb;
+      --border: #e7e9f1;
+      --green: #14835c;
+      --shadow: 0 16px 50px rgba(35, 40, 75, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(ellipse at 10% 0%, #ebeaff 0, transparent 34rem), var(--background);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    button { font: inherit; }
+
+    .page { width: min(1060px, calc(100% - 32px)); margin: 0 auto; padding: 38px 0 48px; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 32px; }
+    .brand { display: flex; align-items: center; gap: 11px; font-weight: 800; letter-spacing: -0.04em; font-size: 1.15rem; }
+    .brand-mark { display: grid; width: 40px; height: 40px; place-items: center; border-radius: 13px; color: #fff; background: var(--primary); box-shadow: 0 8px 18px rgba(99, 91, 255, 0.25); }
+    .election-label { padding: 8px 12px; border: 1px solid var(--border); border-radius: 999px; color: var(--muted); background: rgba(255,255,255,.8); font-size: .82rem; font-weight: 650; }
+    .hero { margin-bottom: 26px; text-align: center; }
+    .eyebrow { margin: 0 0 10px; color: var(--primary); font-size: .78rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 0; font-size: clamp(2rem, 5vw, 3.2rem); letter-spacing: -.06em; line-height: 1.08; }
+    .hero p:last-child { max-width: 560px; margin: 14px auto 0; color: var(--muted); line-height: 1.65; }
+    .notice { display: flex; align-items: flex-start; gap: 11px; margin: 24px 0; padding: 15px 17px; border: 1px solid #e1defe; border-radius: 14px; color: #494479; background: #f0efff; font-size: .92rem; line-height: 1.5; }
+    .notice strong { color: #302a88; }
+    .section-heading { display: flex; align-items: end; justify-content: space-between; gap: 12px; margin: 30px 0 14px; }
+    h2 { margin: 0; font-size: 1.2rem; letter-spacing: -.03em; }
+    .section-heading p { margin: 5px 0 0; color: var(--muted); font-size: .9rem; }
+    .candidate-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+    .candidate-card { display: flex; align-items: center; gap: 15px; padding: 18px; border: 1px solid var(--border); border-radius: 18px; background: var(--surface); box-shadow: 0 6px 24px rgba(35,40,75,.035); transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease; }
+    .candidate-card:hover { transform: translateY(-2px); border-color: #d7d4ff; box-shadow: var(--shadow); }
+    .avatar { display: grid; flex: 0 0 54px; width: 54px; height: 54px; place-items: center; border-radius: 17px; color: #fff; font-size: 1rem; font-weight: 800; letter-spacing: .02em; }
+    .avatar.violet { background: linear-gradient(135deg,#827aff,#5c52ed); }
+    .avatar.coral { background: linear-gradient(135deg,#ff9a83,#ef6c79); }
+    .avatar.teal { background: linear-gradient(135deg,#52cbb5,#219987); }
+    .avatar.gold { background: linear-gradient(135deg,#f8c963,#e99b35); }
+    .candidate-info { flex: 1; min-width: 0; }
+    .candidate-info h3 { margin: 0; font-size: 1rem; letter-spacing: -.02em; }
+    .candidate-info p { margin: 5px 0 0; color: var(--muted); font-size: .85rem; }
+    .vote-button, .reset-button { border: 0; border-radius: 11px; cursor: pointer; font-weight: 750; transition: background 150ms ease, transform 150ms ease, opacity 150ms ease; }
+    .vote-button { padding: 10px 15px; color: #fff; background: var(--primary); white-space: nowrap; }
+    .vote-button:hover:not(:disabled) { transform: translateY(-1px); background: var(--primary-dark); }
+    .vote-button:disabled { cursor: not-allowed; opacity: .55; }
+    .status { min-height: 24px; margin: 14px 2px 0; color: var(--green); font-size: .9rem; font-weight: 650; }
+    .results-panel { margin-top: 30px; padding: 22px; border: 1px solid var(--border); border-radius: 20px; background: var(--surface); box-shadow: var(--shadow); }
+    .results-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
+    .total-pill { padding: 8px 12px; border-radius: 999px; color: #494479; background: #f0efff; font-size: .85rem; font-weight: 750; white-space: nowrap; }
+    .winner-box { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; padding: 13px 15px; border-radius: 13px; color: #176345; background: #eaf8f1; font-size: .92rem; line-height: 1.45; }
+    .winner-box strong { color: #10583c; }
+    .result-row + .result-row { margin-top: 17px; }
+    .result-label { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 8px; font-size: .9rem; }
+    .result-name { font-weight: 700; }
+    .result-votes { color: var(--muted); white-space: nowrap; }
+    .progress-track { height: 10px; overflow: hidden; border-radius: 999px; background: #eff0f5; }
+    .progress-bar { height: 100%; width: 0; border-radius: inherit; background: linear-gradient(90deg,#847cff,var(--primary)); transition: width 350ms ease; }
+    .admin-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--border); }
+    .admin-row p { margin: 0; color: var(--muted); font-size: .82rem; line-height: 1.5; }
+    .reset-button { padding: 10px 14px; border: 1px solid #f0d7d7; color: #a63d46; background: #fff8f8; white-space: nowrap; }
+    .reset-button:hover { background: #ffeded; }
+    button:focus-visible { outline: 3px solid rgba(99,91,255,.35); outline-offset: 3px; }
+    footer { margin-top: 22px; color: #8991a3; font-size: .8rem; text-align: center; }
+    @media (max-width: 650px) { .page { padding-top: 24px; } .candidate-grid { grid-template-columns: 1fr; } .candidate-card { padding: 15px; } .results-panel { padding: 17px; } }
+    @media (max-width: 420px) { .election-label { font-size: .72rem; } .candidate-card { flex-wrap: wrap; } .vote-button { width: 100%; } .admin-row { align-items: flex-start; flex-direction: column; } .reset-button { width: 100%; } }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark" aria-hidden="true">✓</span><span>Campus Vote</span></div>
+      <span class="election-label">Student Council Election</span>
+    </header>
+
+    <section class="hero" aria-labelledby="page-title">
+      <p class="eyebrow">Your voice matters</p>
+      <h1 id="page-title">Choose your candidate.</h1>
+      <p>Review the candidates and cast your vote. You can vote once on this browser.</p>
+    </section>
+
+    <aside class="notice"><span aria-hidden="true">ℹ️</span><div><strong>One browser, one vote.</strong> Your vote is saved locally in this browser and will remain saved on this device.</div></aside>
+
+    <section aria-labelledby="candidates-title">
+      <div class="section-heading"><div><h2 id="candidates-title">Meet the candidates</h2><p>Select the candidate you want to support.</p></div></div>
+      <div class="candidate-grid" id="candidate-list"></div>
+      <p class="status" id="vote-status" role="status" aria-live="polite"></p>
+    </section>
+
+    <section class="results-panel" aria-labelledby="results-title">
+      <div class="results-top">
+        <div><h2 id="results-title">Live results</h2><p style="margin:5px 0 0;color:var(--muted);font-size:.9rem">Votes and percentages update automatically.</p></div>
+        <span class="total-pill" id="total-votes">0 votes</span>
+      </div>
+      <div class="winner-box" id="winner" role="status" aria-live="polite"></div>
+      <div id="results-list"></div>
+      <div class="admin-row"><p><strong>Administrator:</strong> Reset all votes and allow voting again on this browser.</p><button class="reset-button" id="reset-button" type="button">Reset results</button></div>
+    </section>
+    <footer>Built for a student project · Votes are stored in this browser only</footer>
+  </main>
+
+  <script>
+    const candidates = [
+      { id: "alex", name: "Alex Morgan", subtitle: "Leadership & student voice", initials: "AM", color: "violet" },
+      { id: "jordan", name: "Jordan Lee", subtitle: "Campus life & community", initials: "JL", color: "coral" },
+      { id: "sam", name: "Sam Rivera", subtitle: "Learning & student support", initials: "SR", color: "teal" },
+      { id: "taylor", name: "Taylor Chen", subtitle: "Sustainability & innovation", initials: "TC", color: "gold" }
+    ];
+
+    const STORAGE_KEY = "campus-vote-system-v1";
+    const emptyVotes = () => Object.fromEntries(candidates.map(candidate => [candidate.id, 0]));
+
+    function loadState() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        const votes = emptyVotes();
+        if (saved && saved.votes && typeof saved.votes === "object") {
+          for (const candidate of candidates) {
+            const value = Number(saved.votes[candidate.id]);
+            votes[candidate.id] = Number.isFinite(value) && value > 0 ? Math.floor(value) : 0;
+          }
+        }
+        return { votes, hasVoted: Boolean(saved && saved.hasVoted) };
+      } catch {
+        return { votes: emptyVotes(), hasVoted: false };
+      }
+    }
+
+    let state = loadState();
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        return true;
+      } catch {
+        setStatus("Could not save your vote. Check that browser storage is enabled.", true);
+        return false;
+      }
+    }
+
+    function setStatus(message, isError = false) {
+      const status = document.getElementById("vote-status");
+      status.textContent = message;
+      status.style.color = isError ? "#a63d46" : "";
+    }
+
+    function renderCandidates() {
+      const list = document.getElementById("candidate-list");
+      list.replaceChildren();
+      for (const candidate of candidates) {
+        const card = document.createElement("article");
+        card.className = "candidate-card";
+        const avatar = document.createElement("div");
+        avatar.className = `avatar ${candidate.color}`;
+        avatar.setAttribute("aria-hidden", "true");
+        avatar.textContent = candidate.initials;
+        const info = document.createElement("div");
+        info.className = "candidate-info";
+        const name = document.createElement("h3");
+        name.textContent = candidate.name;
+        const subtitle = document.createElement("p");
+        subtitle.textContent = candidate.subtitle;
+        const button = document.createElement("button");
+        button.className = "vote-button";
+        button.type = "button";
+        button.textContent = state.hasVoted ? "Already voted" : "Vote";
+        button.disabled = state.hasVoted;
+        button.setAttribute("aria-label", `Vote for ${candidate.name}`);
+        button.addEventListener("click", () => castVote(candidate.id));
+        info.append(name, subtitle);
+        card.append(avatar, info, button);
+        list.append(card);
+      }
+    }
+
+    function renderResults() {
+      const total = Object.values(state.votes).reduce((sum, votes) => sum + votes, 0);
+      document.getElementById("total-votes").textContent = `${total} ${total === 1 ? "vote" : "votes"}`;
+      const maxVotes = Math.max(...Object.values(state.votes));
+      const leaders = candidates.filter(candidate => state.votes[candidate.id] === maxVotes);
+      const winner = document.getElementById("winner");
+      if (total === 0) {
+        winner.innerHTML = '<span aria-hidden="true">🏆</span><span>No votes yet — be the first to vote!</span>';
+      } else if (leaders.length > 1) {
+        winner.innerHTML = '<span aria-hidden="true">🤝</span><span>It’s a tie between <strong></strong>.</span>';
+        winner.querySelector("strong").textContent = leaders.map(candidate => candidate.name).join(" and ");
+      } else {
+        winner.innerHTML = '<span aria-hidden="true">🏆</span><span>Leading candidate: <strong></strong></span>';
+        winner.querySelector("strong").textContent = leaders[0].name;
+      }
+      const resultsList = document.getElementById("results-list");
+      resultsList.replaceChildren();
+      for (const candidate of candidates) {
+        const votes = state.votes[candidate.id];
+        const percentage = total === 0 ? 0 : (votes / total) * 100;
+        const row = document.createElement("div");
+        row.className = "result-row";
+        const label = document.createElement("div");
+        label.className = "result-label";
+        const name = document.createElement("span");
+        name.className = "result-name";
+        name.textContent = candidate.name;
+        const count = document.createElement("span");
+        count.className = "result-votes";
+        count.textContent = `${votes} ${votes === 1 ? "vote" : "votes"} · ${percentage.toFixed(1)}%`;
+        const track = document.createElement("div");
+        track.className = "progress-track";
+        track.setAttribute("role", "progressbar");
+        track.setAttribute("aria-label", `${candidate.name} vote share`);
+        track.setAttribute("aria-valuemin", "0");
+        track.setAttribute("aria-valuemax", "100");
+        track.setAttribute("aria-valuenow", percentage.toFixed(1));
+        const bar = document.createElement("div");
+        bar.className = "progress-bar";
+        bar.style.width = `${percentage}%`;
+        label.append(name, count);
+        track.append(bar);
+        row.append(label, track);
+        resultsList.append(row);
+      }
+    }
+
+    function castVote(candidateId) {
+      if (state.hasVoted || !candidates.some(candidate => candidate.id === candidateId)) return;
+      state.votes[candidateId] += 1;
+      state.hasVoted = true;
+      if (!saveState()) {
+        state.votes[candidateId] -= 1;
+        state.hasVoted = false;
+        return;
+      }
+      const candidate = candidates.find(item => item.id === candidateId);
+      setStatus(`Your vote for ${candidate.name} has been recorded. Thank you!`);
+      renderCandidates();
+      renderResults();
+    }
+
+    document.getElementById("reset-button").addEventListener("click", () => {
+      if (!window.confirm("Reset all results and allow voting again on this browser?")) return;
+      state = { votes: emptyVotes(), hasVoted: false };
+      if (!saveState()) return;
+      setStatus("Voting results have been reset.");
+      renderCandidates();
+      renderResults();
+    });
+
+    renderCandidates();
+    renderResults();
+    if (state.hasVoted) setStatus("You have already voted on this browser. Thank you!");
+  </script>
+</body>
+</html>
